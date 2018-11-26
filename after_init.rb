@@ -1,0 +1,1 @@
+EpmBetterCreateIssue.register_to_all(plugin: :epm_better_create_issue)

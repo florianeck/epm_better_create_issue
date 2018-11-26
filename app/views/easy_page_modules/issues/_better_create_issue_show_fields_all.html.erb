@@ -1,0 +1,41 @@
+<% if issue -%>
+  <div class="issue_updatable_fields grid_4 ">
+    <div id="<%= "#{block_name}attributes" %>" class="attributes ">
+      <%= render :partial => 'issues/new_form_updatable_attributes', :locals => {
+        :issue => issue,
+        :project => issue.project,
+        :object_name => "#{block_name}issue",
+        :modul_uniq_id => block_name,
+        :priorities => issue_priorities,
+        :allowed_statuses => allowed_statuses,
+        :projects => projects,
+        :projects_ajax_url => url_for({ :controller => :my, :action => :update_my_page_new_issue_dependent_fields}),
+        :issue_ajax_path => url_for({ :controller => :my, :action => :update_my_page_new_issue_attributes}),
+        :select_project => true
+      } -%>
+    </div>
+    <div id="attachments-form">
+      <h4 class="issue-attachments-heading"><%= l(:label_issue_attachments_heading) -%></h4>
+      <%= render :partial => 'attachments/form', :locals => {:container => issue} %>
+      <%= render :partial => "clipboard_image_paste/add_form" %>
+    </div>
+    <%= render :partial => 'issues/easy_distributed_tasks', :locals => {:issue => issue, :project => issue.project} %>
+    <%= call_hook(:view_issue_new_form_atachments_after, {:issue => issue, :project => issue.project, :block_name => block_name}) %>
+  </div>
+
+  <div id="<%= block_name %>issue-form_issue_others_static_fields" class="issue_others_static_fields grid_3 omega alpha">
+    <%= toggling_container("issue-watcher-toggle-container-#{params[:format]}", user, {:heading => l(:label_issue_watchers_heading), :default_button_state => !in_mobile_view?}) do  %>
+      <div class="issue_watchers">
+        <%= render :partial => 'watchers/watchers_avatar_and_checkbox_with_groups', :locals => {:watchable => issue, :project => issue.project, :object_name => "#{block_name}issue"} -%>
+      </div>
+    <% end if user.allowed_to?(:add_issue_watchers, issue.project) %>
+
+  </div>
+  <script type="text/javascript">
+    EASY.schedule.main(function () {
+      $('#<%= block_name %>issue-form_issue_others_static_fields').css(
+          {'max-height': $('#<%= block_name %>attributes').height().toString() + 'px'}
+      );
+    });
+  </script>
+<% end -%>

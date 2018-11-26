@@ -1,0 +1,68 @@
+<%
+  issue = @easy_page_modules_data[block_name][:issue]
+  hidden_fields = @easy_page_modules_data[block_name][:hidden_fields]
+  only_selected = @easy_page_modules_data[block_name][:only_selected]
+  block_settings = @easy_page_modules_data[block_name][:settings]
+  estimated_hours_value = begin block_settings['selected_fields']['estimated_hours']['default_value']; rescue; end
+  show_option_all = (block_settings['show_fields_option'] == 'all' && user.allowed_to?(:add_issue_watchers, issue.project)) && !in_mobile_view?
+%>
+<div id="<%= block_name %>" class="my-page-updatable-attributes new-issue-form">
+    <% if block_settings['show_fields_option'] == 'all' %>
+      <p><i class="indicator icon-loading icon-spin"></i></p>
+
+      <script type="text/javascript">
+        EASY.schedule.late(function(){
+          $.get('<%= j new_issue_path %>',{}, function(data) {$("#<%= block_name %>").html(data);$("#<%= block_name %> h3.title").remove(); setupFileDrop(); EASY.utils.initFileUploads(); initEasyAutocomplete();});
+        });
+      </script>
+    <% else %>
+      <%= labelled_form_for :"#{block_name}issue", issue, :html => {:multipart => true, :id => "#{block_name}issue-form", :class => 'new-issue-form easy-page-module-selected-fields form-box'}, :url => my_new_my_page_create_issue_path(:t => params[:t]), :remote => true do |f| %>
+        <%= hidden_field_tag 'block_name', block_name -%>
+        <%= hidden_field_tag 'uuid', page_module.uuid -%>
+        <%= hidden_field_tag 'user_id', user.id -%>
+        <%= hidden_field_tag 'show_fields_option', block_settings['show_fields_option'] -%>
+        <%= hidden_field_tag 'back_url', params[:back_url] || url_for(params) -%>
+        <%= error_messages_for issue -%>
+        <% available_fields_left = [:subject,:description,:easy_issue_timer,:easy_is_repeating,:attachments] %>
+        <% show_left =  !(available_fields_left - hidden_fields).empty? %>
+        <% available_fields_right = [:project_id,:tracker_id,:priority_id,:status_id,:start_date,:due_date,:estimated_hours,:category,:custom_fields] %>
+        <% show_right =  !(available_fields_right - hidden_fields).empty? %>
+        <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontent' do %>
+          <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontentleft' do %>
+            <div class="box" style="<%= 'display:none;' if !show_left %>">
+              <%= render :partial => 'issues/new_form_static_attributes',
+                         :locals => {:object_name => block_name+'issue',
+                                     :issue => issue, :modul_uniq_id => block_name,
+                                     :enable_editor => (block_settings['enable_text_editor'] == '1' && !in_mobile_view?),
+                                     :hidden_fields =>  hidden_fields} %>
+            </div>
+          <% end -%>
+
+          <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontentleft' do %>
+            <div class="box" style="<%= 'display:none;' if !show_left %>">
+              <%= render :partial => 'easy_page_modules/issues/issues_create_new_show_fields_only_required',
+                       :locals => { :issue => issue,
+                                    :user => user, :block_name => block_name,
+                                    :show_fields_option => block_settings['show_fields_option'],
+                                    :issue_priorities => @easy_page_modules_data[block_name][:issue_priorities],
+                                    :assignable_users => @easy_page_modules_data[block_name][:assignable_users],
+                                    :projects => @easy_page_modules_data[block_name][:projects],
+                                    :estimated_hours => estimated_hours_value,
+                                    :hidden_fields => hidden_fields, :only_selected => only_selected,
+                                    :allowed_statuses => @easy_page_modules_data[block_name][:allowed_statuses],
+                                    :allowed_trackers => @easy_page_modules_data[block_name][:allowed_trackers],
+                                    :required_attributes => @easy_page_modules_data[block_name][:required_attributes]} %>
+            </div>
+          <% end -%>
+        <% end -%>
+        <div class="clear"></div>
+        <div class="form-actions">
+          <%= submit_tag l(:button_create) , :class => 'button-positive'%>
+        </div>
+      <% end -%>
+    <% end -%>
+</div>
+
+<%= include_calendar_headers_tags %>
+<%= include_attachment_tags %>
+<%= call_hook(:view_new_issue_module_form_bottom, {:issue => issue, :project => issue.project, :block_name => block_name, :block_settings => block_settings}) %>

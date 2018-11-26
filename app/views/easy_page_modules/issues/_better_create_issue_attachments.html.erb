@@ -1,0 +1,34 @@
+<%= labelled_fields_for :issue, @issue do |f| %>
+  <div id="<%= block_name+'issue_attachments_fields' %>" class="attachments_fields">
+    <div id="<%= block_name+'issue_attachments_file' %>" class="issue_attachments_file">
+      <%=l(:label_attachment_plural)%><br />
+      <%= file_field_tag block_name+'issue_attachments[1][file]', :size => 32, :id => nil  -%>
+    </div>
+    <small><%= link_to l(:label_add_another_file), '#', :onclick => "addFileFieldUniq('#{block_name}issue_'); return false;" %>
+      (<%= l(:label_max_size) %>: <%= number_to_human_size(Setting.attachment_max_size.to_i.kilobytes) %>)
+    </small>
+  </div>
+<% end %>
+
+<script type="text/javascript">
+  (function () {
+    var fileFieldCount = 1;
+
+    window.addFileFieldUniq = function(block_name) {
+      fileFieldCount++;
+      var f = document.createElement("input");
+      f.type = "file";
+      f.name = block_name + "attachments[" + fileFieldCount + "][file]";
+      f.size = 30;
+      var d = document.createElement("input");
+      d.type = "text";
+      d.name = block_name + "attachments[" + fileFieldCount + "][description]";
+      d.size = 60;
+
+      p = document.getElementById(block_name + "attachments_fields");
+      p.appendChild(document.createElement("br"));
+      p.appendChild(f);
+      p.appendChild(d);
+    }
+  })();
+</script>

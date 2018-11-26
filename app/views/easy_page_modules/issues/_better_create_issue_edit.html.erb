@@ -1,0 +1,87 @@
+<% settings["enable_text_editor"] ||= '1'
+settings["show_fields_option"] ||= 'all'
+settings['selected_fields'] ||= {} %>
+<% available_fields = @easy_page_modules_data[block_name][:available_fields] %>
+<p>
+  <span class="my-page-issue-query-select-label"><%= l(:label_my_page_issue_show_fields_option_part1) -%></span>
+  <span class="my-page-issue-query-select">
+    <%= select_tag "#{block_name}[show_fields_option]",
+      options_for_select([
+        [l(:general_all),'all'],
+        [l(:general_only_required),'only_required'],
+        [l(:option_only_selected), 'only_selected']
+        ], :selected => settings["show_fields_option"]), :class => 'inline' -%>
+  </span>
+  <span class="my-page-issue-query-select-label"><%= l(:label_my_page_issue_show_fields_option_part2) -%></span>
+</p>
+<div id="<%= block_name %>-field-selection" style="<%= 'display:none' unless settings['show_fields_option'] == 'only_selected' %>" class="autoscroll">
+  <table class="list">
+    <thead>
+      <tr>
+        <th><%= l('easy_page_module.new_issue.field') %></th>
+        <th><%= l('easy_page_module.new_issue.show') %></th>
+        <th><%= l('easy_page_module.new_issue.default_value') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% available_fields.each do |field_name, field_settings| %>
+        <tr>
+          <td><%= l(field_settings[:label] || "field_#{field_name}") %></td>
+          <% field_prefix = "#{block_name}[selected_fields][#{field_name}]" %>
+          <td>
+            <%= check_box_tag "#{field_prefix}[enabled]", '1',
+              settings['selected_fields'][field_name.to_s] && settings['selected_fields'][field_name.to_s]['enabled'] %>
+          </td>
+          <% field_val_name = "#{field_prefix}[default_value]" %>
+          <% field_val_id = "#{block_name}_selected_fields_#{field_name}_default_value" %>
+          <% value = settings['selected_fields'][field_name.to_s] ? settings['selected_fields'][field_name.to_s]['default_value'] : '' %>
+          <td>
+            <% case field_name %>
+            <% when :subject %>
+              <%= text_field_tag field_val_name, value, :size => 60 %>
+            <% when :description %>
+              <%= text_area_tag field_val_name, value, :cols => 60, :rows => 10 %>
+            <% when :project_id %>
+              <% selected_project_value = (value.blank? ? {:name => '', :id => ''} : {:name => Project.where(:id => value).pluck(:name).join, :id => value}) %>
+              <%= easy_select_tag(
+                field_val_name, selected_project_value, field_settings[:values].blank? ? nil : project_tree_options_for_select(field_settings[:values], {:selected => value}),
+                easy_autocomplete_path('add_issue_projects'),
+                :html_options => {:id => field_val_id}, :root_element => 'projects') -%>
+            <% when :tracker_id %>
+              <%= select_tag field_val_name,
+                options_for_select(field_settings[:values].collect {|t| [t.name, t.id.to_s]}, value),
+                {:include_blank => true, :multiple => true, :size => 6} %>
+            <% when :tracker_id, :assigned_to_id, :priority_id, :status_id, :fixed_version_id %>
+              <%= select_tag field_val_name,
+                options_for_select(field_settings[:values].collect {|t| [t.name, t.id.to_s]}, value),
+                {:include_blank => true} %>
+            <% when :start_date, :due_date %>
+              <%= text_field_tag field_val_name, value, :size => 10, :id => "#{block_name}-#{field_name}" %>
+              <%= calendar_for("#{block_name}-#{field_name}") %>
+            <% when :attachments, :easy_is_repeating, :custom_fields, :easy_issue_timer %>
+              <%= hidden_field_tag field_val_name, value %>
+            <% when :category %>
+              <%= hidden_field_tag field_val_name, '' %>
+            <% when :estimated_hours %>
+              <%= text_field_tag field_val_name, value, size: 3, placeholder: l(:field_hours) %>
+            <% else %>
+              <%= text_field_tag field_val_name, value %>
+            <% end -%>
+          </td>
+        </tr>
+      <% end -%>
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript">
+  EASY.schedule.late(function() {
+    var name = '<%= block_name %>';
+    var select = $('#' + name + '_show_fields_option');
+    var settings = $('#' + name + '-field-selection');
+    initEasyAutocomplete();
+    select.change(function() {
+      settings.toggle($(this).val() === 'only_selected');
+    });
+  });
+</script>
