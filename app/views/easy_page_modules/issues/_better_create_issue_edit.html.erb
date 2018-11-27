@@ -14,6 +14,7 @@ settings['selected_fields'] ||= {} %>
   </span>
   <span class="my-page-issue-query-select-label"><%= l(:label_my_page_issue_show_fields_option_part2) -%></span>
 </p>
+
 <div id="<%= block_name %>-field-selection" style="<%= 'display:none' unless settings['show_fields_option'] == 'only_selected' %>" class="autoscroll">
   <table class="list">
     <thead>
@@ -24,17 +25,43 @@ settings['selected_fields'] ||= {} %>
       </tr>
     </thead>
     <tbody>
+
       <% available_fields.each do |field_name, field_settings| %>
-        <tr>
+        <% field_prefix = "#{block_name}[selected_fields][#{field_name}]" %>
+        <% field_val_name = "#{field_prefix}[default_value]" %>
+        <% field_val_id = "#{block_name}_selected_fields_#{field_name}_default_value" %>
+        <% value = settings['selected_fields'][field_name.to_s] ? settings['selected_fields'][field_name.to_s]['default_value'] : '' %>
+        
+          <% if field_name == :custom_fields %>
+            <tr>
+              <td><b><%= l(field_settings[:label] || "field_#{field_name}") %></b></td>
+          
+              <td>
+                <%= check_box_tag "#{field_prefix}[enabled]", '1',
+                  settings['selected_fields'][field_name.to_s] && settings['selected_fields'][field_name.to_s]['enabled'] %>
+              </td>
+              <td></td>
+            </tr>
+            <%= fields_for field_val_name do |custom_fields_settings| %>
+              <% IssueCustomField.all.each do |custom_field| %>
+                <%= custom_fields_settings.fields_for custom_field.id.to_s do |cf|  %>
+                <tr>
+                  <td style="padding-left: 50px;"><%= custom_field.name %></td>
+                  <td><%= cf.check_box :enabled %></td>
+                  <td><%= cf.text_field :default %></td>
+                </tr>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% else %>
+          <tr>
           <td><%= l(field_settings[:label] || "field_#{field_name}") %></td>
-          <% field_prefix = "#{block_name}[selected_fields][#{field_name}]" %>
+          
           <td>
             <%= check_box_tag "#{field_prefix}[enabled]", '1',
               settings['selected_fields'][field_name.to_s] && settings['selected_fields'][field_name.to_s]['enabled'] %>
           </td>
-          <% field_val_name = "#{field_prefix}[default_value]" %>
-          <% field_val_id = "#{block_name}_selected_fields_#{field_name}_default_value" %>
-          <% value = settings['selected_fields'][field_name.to_s] ? settings['selected_fields'][field_name.to_s]['default_value'] : '' %>
+          
           <td>
             <% case field_name %>
             <% when :subject %>
@@ -58,7 +85,7 @@ settings['selected_fields'] ||= {} %>
             <% when :start_date, :due_date %>
               <%= text_field_tag field_val_name, value, :size => 10, :id => "#{block_name}-#{field_name}" %>
               <%= calendar_for("#{block_name}-#{field_name}") %>
-            <% when :attachments, :easy_is_repeating, :custom_fields, :easy_issue_timer %>
+            <% when :attachments, :easy_is_repeating, :easy_issue_timer %>
               <%= hidden_field_tag field_val_name, value %>
             <% when :category %>
               <%= hidden_field_tag field_val_name, '' %>
@@ -68,7 +95,9 @@ settings['selected_fields'] ||= {} %>
               <%= text_field_tag field_val_name, value %>
             <% end -%>
           </td>
-        </tr>
+          </tr>
+          <% end %>
+        
       <% end -%>
     </tbody>
   </table>
