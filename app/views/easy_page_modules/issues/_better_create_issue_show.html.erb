@@ -4,18 +4,9 @@
   only_selected = @easy_page_modules_data[block_name][:only_selected]
   block_settings = @easy_page_modules_data[block_name][:settings]
   estimated_hours_value = begin block_settings['selected_fields']['estimated_hours']['default_value']; rescue; end
-  show_option_all = (block_settings['show_fields_option'] == 'all' && user.allowed_to?(:add_issue_watchers, issue.project)) && !in_mobile_view?
 %>
 <div id="<%= block_name %>" class="my-page-updatable-attributes new-issue-form">
-    <% if block_settings['show_fields_option'] == 'all' %>
-      <p><i class="indicator icon-loading icon-spin"></i></p>
-
-      <script type="text/javascript">
-        EASY.schedule.late(function(){
-          $.get('<%= j new_issue_path %>',{}, function(data) {$("#<%= block_name %>").html(data);$("#<%= block_name %> h3.title").remove(); setupFileDrop(); EASY.utils.initFileUploads(); initEasyAutocomplete();});
-        });
-      </script>
-    <% else %>
+    
       <%= labelled_form_for :"#{block_name}issue", issue, :html => {:multipart => true, :id => "#{block_name}issue-form", :class => 'new-issue-form easy-page-module-selected-fields form-box'}, :url => my_new_my_page_create_issue_path(:t => params[:t]), :remote => true do |f| %>
         <%= hidden_field_tag 'block_name', block_name -%>
         <%= hidden_field_tag 'uuid', page_module.uuid -%>
@@ -60,7 +51,7 @@
           <%= submit_tag l(:button_create) , :class => 'button-positive'%>
         </div>
       <% end -%>
-    <% end -%>
+
 </div>
 
 <%= include_calendar_headers_tags %>

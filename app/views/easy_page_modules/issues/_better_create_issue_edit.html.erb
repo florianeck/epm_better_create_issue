@@ -2,20 +2,9 @@
 settings["show_fields_option"] ||= 'all'
 settings['selected_fields'] ||= {} %>
 <% available_fields = @easy_page_modules_data[block_name][:available_fields] %>
-<p>
-  <span class="my-page-issue-query-select-label"><%= l(:label_my_page_issue_show_fields_option_part1) -%></span>
-  <span class="my-page-issue-query-select">
-    <%= select_tag "#{block_name}[show_fields_option]",
-      options_for_select([
-        [l(:general_all),'all'],
-        [l(:general_only_required),'only_required'],
-        [l(:option_only_selected), 'only_selected']
-        ], :selected => settings["show_fields_option"]), :class => 'inline' -%>
-  </span>
-  <span class="my-page-issue-query-select-label"><%= l(:label_my_page_issue_show_fields_option_part2) -%></span>
-</p>
+<%= hidden_field_tag "#{block_name}[show_fields_option]", 'only_selected' %>
 
-<div id="<%= block_name %>-field-selection" style="<%= 'display:none' unless settings['show_fields_option'] == 'only_selected' %>" class="autoscroll">
+<div id="<%= block_name %>-field-selection" class="autoscroll">
   <table class="list">
     <thead>
       <tr>
