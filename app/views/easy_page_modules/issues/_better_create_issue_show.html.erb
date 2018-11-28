@@ -31,7 +31,7 @@
 
           <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontentleft' do %>
             <div class="box" style="<%= 'display:none;' if !show_left %>">
-              <%= render :partial => 'easy_page_modules/issues/issues_create_new_show_fields_only_required',
+              <%= render :partial => 'easy_page_modules/issues/better_create_issue_show_fields_only_required',
                        :locals => { :issue => issue,
                                     :user => user, :block_name => block_name,
                                     :show_fields_option => block_settings['show_fields_option'],

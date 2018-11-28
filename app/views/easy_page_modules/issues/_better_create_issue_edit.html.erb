@@ -31,17 +31,16 @@ settings['selected_fields'] ||= {} %>
               </td>
               <td></td>
             </tr>
-            <%= fields_for field_val_name do |custom_fields_settings| %>
+            
               <% IssueCustomField.all.each do |custom_field| %>
-                <%= custom_fields_settings.fields_for custom_field.id.to_s do |cf|  %>
                 <tr>
                   <td style="padding-left: 50px;"><%= custom_field.name %></td>
-                  <td><%= cf.check_box :enabled %></td>
-                  <td><%= cf.text_field :default %></td>
+                  <td><%= check_box_tag "#{field_prefix}[#{custom_field.id}][enabled]", '1', settings['selected_fields'].dig(field_name.to_s, custom_field.id.to_s, 'enabled') %></td>
+                  <td>
+                    <%= custom_field.format.bulk_edit_tag self, "#{custom_field.id}", "#{field_prefix}[#{custom_field.id}][default]", custom_field, nil, settings['selected_fields'].dig(field_name.to_s, custom_field.id.to_s, 'default') %>
+                  </td>
                 </tr>
-                <% end %>
               <% end %>
-            <% end %>
           <% else %>
           <tr>
           <td><%= l(field_settings[:label] || "field_#{field_name}") %></td>
