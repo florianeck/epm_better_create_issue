@@ -1,0 +1,11 @@
+<% partial_locals = { :issue => @issue, :user => @user, :block_name => params[:block_name], :estimated_hours => @issue.estimated_hours,:show_fields_option => params[:show_fields_option], :issue_priorities => @issue_priorities, :issue_assignable_users => @assignable_users, :projects => @projects, :allowed_statuses => @allowed_statuses} %>
+<% if params[:show_fields_option] == 'all' %>
+  $("#<%= "#{params[:block_name]}" %>issue-dependent-fields").html('<%= j(render(:partial => 'easy_page_modules/issues/issues_create_new_show_fields_all', :locals => partial_locals)) %>')
+<% else
+  epm = EasyPageZoneModule.find(params['uuid'].tr('_', '-'))
+  epm_locals = epm.get_show_data(@user, nil, :issue => @issue)
+  %>
+  $("#<%= "#{params[:block_name]}" %>issue-dependent-fields").html('<%= j(render(:partial => 'easy_page_modules/issues/issues_create_new_show_fields_only_required', :locals => epm_locals.merge(partial_locals))) %>')
+<% end %>
+
+initEasyAutocomplete();
