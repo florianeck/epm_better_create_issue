@@ -75,14 +75,19 @@
       <% end %>
 
       <% if issue.safe_attribute? 'custom_field_values' %>
-        <div class="attribute" style="<%= 'display:none;' if hidden_fields.include?(:custom_fields) || issue.editable_custom_field_values.empty? %>">
+        <div class="attribute">
           <div class="custom_fields">
             <%= toggling_container("issue-form-custom-fields-#{params[:format]}", User.current, {:heading => l(:label_custom_field_plural), :wrapping_heading_element_classes => ' icon icon-db-key'}) do  %>
-              <div class="box">
+              
+              
                 <% issue.editable_custom_field_values.each_with_index do |value, idx| %>
+                <% hidden = (@easy_page_modules_data[block_name][:settings]['selected_fields']['custom_fields'][value.custom_field.id.to_s]['enabled'] != '1' ) %>
+                <div class="box" style="<%= 'display: none;' if hidden %>">
+                  <% value.value = @easy_page_modules_data[block_name][:settings]['selected_fields']['custom_fields'][value.custom_field.id.to_s]['default'] %>
                   <p class="new-issue-custom-field"><%= custom_field_tag_with_label block_name+'issue', value %></p>
+                </div>  
                 <% end %>
-              </div>
+              
             </div>
           <% end %>
         </div>
