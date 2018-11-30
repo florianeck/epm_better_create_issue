@@ -14,7 +14,15 @@ settings['selected_fields'] ||= {} %>
       </tr>
     </thead>
     <tbody>
-
+      <tr>
+        <td><b><%= "Name" %></b></td>
+    
+        <td><%= text_field_tag "#{block_name}[name]", settings['name'].presence || t('easy_pages.modules.better_create_issue') %>
+          
+        </td>
+        <td></td>
+      </tr>
+      
       <% available_fields.each do |field_name, field_settings| %>
         <% field_prefix = "#{block_name}[selected_fields][#{field_name}]" %>
         <% field_val_name = "#{field_prefix}[default_value]" %>

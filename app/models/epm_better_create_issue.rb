@@ -63,6 +63,10 @@ class EpmBetterCreateIssue < EasyPageModule
   def get_edit_data(settings, user, page_context={})
     return {:available_fields => available_fields}
   end
+  
+  def page_module_toggling_container_options_helper_method
+    'epm_better_create_issue_toggling_container_options'
+  end
 
   private
 
