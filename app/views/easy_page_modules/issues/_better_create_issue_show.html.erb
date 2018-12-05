@@ -18,8 +18,8 @@
         <% show_left =  !(available_fields_left - hidden_fields).empty? %>
         <% available_fields_right = [:project_id,:tracker_id,:priority_id,:status_id,:start_date,:due_date,:estimated_hours,:category,:custom_fields] %>
         <% show_right =  !(available_fields_right - hidden_fields).empty? %>
-        <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontent' do %>
-          <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontentleft' do %>
+        <%= content_tag :div, :class => 'splitcontent' do %>
+          <%= conditional_content_tag show_left, :div, :class => 'splitcontentleft' do %>
             <div class="box" style="<%= 'display:none;' if !show_left %>">
               <%= render :partial => 'issues/new_form_static_attributes',
                          :locals => {:object_name => block_name+'issue',
@@ -29,8 +29,8 @@
             </div>
           <% end -%>
 
-          <%= conditional_content_tag show_left && show_right, :div, :class => 'splitcontentleft' do %>
-            <div class="box" style="<%= 'display:none;' if !show_left %>">
+          <%= conditional_content_tag show_right, :div, :class => 'splitcontentleft' do %>
+            <div class="box" style="<%= 'display:none;' if !show_right %>">
               <%= render :partial => 'easy_page_modules/issues/better_create_issue_show_fields_only_required',
                        :locals => { :issue => issue,
                                     :user => user, :block_name => block_name,
